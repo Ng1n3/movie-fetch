@@ -56,39 +56,65 @@ const KEY = "1d9d7ab1";
 // Structural component
 export default function App() {
   const [movies, setMovies] = useState([]);
+  const [query, setQuery] = useState("");
   const [watched, setWatched] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  const query = "dfasdfsa";
+  const tempQuery = "aquaman";
 
-  useEffect(function () {
-    async function fetchMovies() {
-      try {
-        setIsLoading(true);
-        const res = await fetch(
-          `http://www.omdbapi.com/?apikey=${KEY}&s=${query}`
-        );
-        if (!res.ok)
-          throw new Error("Something went wrong with fetching movies");
-        const data = await res.json();
-        if(data.Response === 'False') throw new Error('Movie not found')
-        setMovies(data.Search);
+  /*
+  useEffect(function() {
+    console.log('After initial render')
+  }, [])
 
-      } catch (err) {
-        console.error(err.message);
-        setError(err.message);
-      } finally {
-        setIsLoading(false);
+  useEffect(function() {
+    console.log('After every render')
+  })
+
+  useEffect(function() {
+    console.log('D')
+  }, [query])
+
+  console.log('During render');
+
+  */
+
+  useEffect(
+    function () {
+      async function fetchMovies() {
+        try {
+          setIsLoading(true);
+          setError("");
+          const res = await fetch(
+            `http://www.omdbapi.com/?apikey=${KEY}&s=${query}`
+          );
+          if (!res.ok)
+            throw new Error("Something went wrong with fetching movies");
+          const data = await res.json();
+          if (data.Response === "False") throw new Error("Movie not found");
+          setMovies(data.Search);
+        } catch (err) {
+          console.error(err.message);
+          setError(err.message);
+        } finally {
+          setIsLoading(false);
+        }
       }
-    }
-    fetchMovies();
-  }, []);
+      if (query.length < 3) {
+        setMovies([]);
+        setError("");
+        return;
+      }
+      fetchMovies();
+    },
+    [query]
+  );
 
   return (
     <>
       <Nav movies={movies}>
         <Logo />
-        <Search />
+        <Search query={query} setQuery={setQuery} />
         <NumResults movies={movies} />
       </Nav>
       <Main>
@@ -135,8 +161,7 @@ function Logo() {
 }
 
 // stateful component
-function Search() {
-  const [query, setQuery] = useState("");
+function Search({ query, setQuery }) {
   return (
     <input
       className="search"
