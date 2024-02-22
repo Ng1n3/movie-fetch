@@ -351,6 +351,10 @@ function MovieDetail({ selectedId, onCloseMovie, onAddWatched, watched }) {
     function () {
       if (!title) return;
       document.title = `Movie | ${title}`;
+
+      return function () {
+        document.title = "usePopcorn"; // logging title gives us the previous tiltle not usePopcorn due to closure.
+      };
     },
     [title]
   );
